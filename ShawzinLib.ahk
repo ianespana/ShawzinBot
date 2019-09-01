@@ -2,7 +2,7 @@
 ; ShawzinLib.ahk
 ; Convert a MIDI note to a Shawzin keypress
 ;
-; Made by Heracles421
+; Modified by Heracles421
 ; https://github.com/ianespana/ShawzinBot
 ;
 ; Original full keyboard script made by T2k5
