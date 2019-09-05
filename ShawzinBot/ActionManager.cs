@@ -4,10 +4,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Shapes;
+
+using InputManager;
+using Timer = System.Threading.Timer;
 
 namespace ShawzinBot
 {
@@ -54,6 +58,10 @@ namespace ShawzinBot
         [DllImport("user32.dll")]
         private static extern int SetForegroundWindow(IntPtr hwnd);
 
+		[DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+		private static extern IntPtr GetForegroundWindow();
+
+
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool GetWindowPlacement(IntPtr hWnd, ref WindowPlacement lpwndpl);
@@ -65,7 +73,9 @@ namespace ShawzinBot
         private static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindows);
 
         [DllImport("User32.dll")]
-        private static extern Int32 SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, StringBuilder lParam);
+        private static extern Int32 SendMessage(IntPtr hWnd, UInt32 Msg, char wParam, UInt32 lParam);
+
+		public static IntPtr warframeWindow = IntPtr.Zero; //TODO turn this into a non-global variable
 
         public static void SendNote(int noteId)
         {
@@ -81,34 +91,46 @@ namespace ShawzinBot
                 }
             }*/
 
-            IntPtr hWnd = FindWindow("Notepad++", "new 3 - Notepad++");
-            if (!hWnd.Equals(IntPtr.Zero))
-            {
-                IntPtr edithWnd = FindWindowEx(hWnd, IntPtr.Zero, "Edit", null);
-                if (!edithWnd.Equals(IntPtr.Zero))
-                {
-                    SendMessage(edithWnd, WM_SETTEXT, IntPtr.Zero, new StringBuilder("Test"));
-                }
+            IntPtr hWnd = GetForegroundWindow();
+            if (!warframeWindow.Equals(IntPtr.Zero) && hWnd.Equals(warframeWindow))
+			{
+				KeyTap(Keys.D1); //TODO Replace with whatever key the note should be
             }
         }
+
+		public static void KeyTap(Keys key)
+		{
+			Keyboard.KeyDown(key);
+			Keyboard.KeyUp(key);
+		}
+
+		public static void KeyHold(Keys key, TimeSpan time) //Hold key for certain amount of time and release, untested
+		{
+			Keyboard.KeyDown(key);
+			new Timer(state=>Keyboard.KeyUp(key), null, time, Timeout.InfiniteTimeSpan);
+		}
 
         public static void BringWindowToFront(string windowName)
         {
-            IntPtr wdwIntPtr = FindWindow(windowName);
-
-            //get the hWnd of the process
-            WindowPlacement placement = new WindowPlacement();
-            GetWindowPlacement(wdwIntPtr, ref placement);
-
-            // Check if window is minimized
-            if (placement.showCmd == 2)
-            {
-                //the window is hidden so we restore it
-                ShowWindow(wdwIntPtr, ShowWindowEnum.Restore);
-            }
-
-            //set user's focus to the window
-            SetForegroundWindow(wdwIntPtr);
+            IntPtr wdwIntPtr = FindWindow(windowName, null);
+			BringWindowToFront(wdwIntPtr);
         }
-    }
+		public static void BringWindowToFront(IntPtr wdwIntPtr)
+		{
+			//get the hWnd of the process
+			WindowPlacement placement = new WindowPlacement();
+			GetWindowPlacement(wdwIntPtr, ref placement);
+
+			// Check if window is minimized
+			if (placement.showCmd == 2)
+			{
+				//the window is hidden so we restore it
+				ShowWindow(wdwIntPtr, ShowWindowEnum.Restore);
+			}
+
+			//set user's focus to the window
+			int focusResult = SetForegroundWindow(wdwIntPtr);
+			Console.WriteLine(focusResult);
+		}
+	}
 }

@@ -168,10 +168,11 @@ namespace ShawzinBot.ViewModels
         #endregion
 
         #region Methods
-        
+
         public void OpenFile()
         {
             var openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = "MIDI file|*.mid;*.midi"; // Filter to only midi files
             if (openFileDialog.ShowDialog() != true) return;
 
             CloseFile();
@@ -192,12 +193,16 @@ namespace ShawzinBot.ViewModels
             {
                 CloseFile();
             };
+			playback.NoteCallback += (data, time, length, playbackTime)=>{ 	// Call function for every note.
+				ActionManager.SendNote(data.NoteNumber);					// Probably won't sound good unless monophonic
+				return data;
+			};
 
             playback.ClockTick += OnTick;
 
             playback.EventPlayed += OnNoteEvent;
         }
-        
+
         public void CloseFile()
         {
             if (playback != null)
@@ -238,6 +243,8 @@ namespace ShawzinBot.ViewModels
                 {
                     playback.OutputDevice = OutputDevice.GetById(0);
                 }
+				ActionManager.warframeWindow = ActionManager.FindWindow("WarframePublicEvolutionGfxD3D11", null); 	//Attempt to focus window, not working yet.
+				ActionManager.BringWindowToFront(ActionManager.warframeWindow ); 														//Still requires the user to click first
                 playback.Start();
             }
         }
