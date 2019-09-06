@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29102.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShawzinBot", "ShawzinBot\ShawzinBot.csproj", "{CD7540A1-95F3-4272-8BDB-13CA17089FAE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CD7540A1-95F3-4272-8BDB-13CA17089FAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD7540A1-95F3-4272-8BDB-13CA17089FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD7540A1-95F3-4272-8BDB-13CA17089FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD7540A1-95F3-4272-8BDB-13CA17089FAE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CACFCEA5-DC76-405A-A79F-281613008D7D}
+	EndGlobalSection
+EndGlobal
