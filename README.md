@@ -2,7 +2,10 @@
 
 ShawzinBot is a program which converts a MIDI input or file to a series of key presses for the Shawzin. Any MIDI input works with this script (a MIDI keyboard, a virtual MIDI channel, etc), as well as [Standard MIDI Files (SMF)](https://www.midi.org/specifications/category/smf-specifications).
 
-## About
+# Download
+You can always get the latest version of ShawzinBot [here](https://github.com/ianespana/ShawzinBot/releases/latest).
+
+# About
 
 What's the ShawzinBot?
 
@@ -15,9 +18,6 @@ ShawzinBot does not in any way interfere with gameplay, nor does it inject new c
 How does it works?
 
 ShawzinBot is built on the C# [DryWetMIDI midi library by melanchall](https://github.com/melanchall/drywetmidi). This library loads a MIDI file and plays it. Every note event is intercepted by ShawzinBot and depending on note's ID, a different combination of keys is pressed to play the sound. ShawzinBot also allows the usage of external MIDI devices, so you can connects to your computer as a MIDI device (keyboard, synthesizers, etc).
-
-# Download
-You can always get the latest version of ShawzinBot [here](https://github.com/ianespana/ShawzinBot/releases/latest).
 
 # Getting Started
 Using ShawzinBot is quite easy. As long as you don't separate any of it's components, it can sit anywhere in your computer. No installation is required, all you need to do is double click ShawzinBot.exe and you'll be good to go! Please note, **you MUST start with the chromatic scale in game!**
