@@ -5,12 +5,15 @@ ShawzinBot is a program which converts a MIDI input or file to a series of key p
 ## About
 
 What's the ShawzinBot?
+
 ShawzinBot is a third party software that can read midi files (.mid) and play their content in-game. It simulates key presses, and that's how the Shawzin is played.
 
 Is it safe?
+
 ShawzinBot does not in any way interfere with gameplay, nor does it inject new code or modify existing one, thus is can't be catalogued as a cheat and should be safe to use.
 
 How does it works?
+
 ShawzinBot is built on the C# [DryWetMIDI midi library by melanchall](https://github.com/melanchall/drywetmidi). This library loads a MIDI file and plays it. Every note event is intercepted by ShawzinBot and depending on note's ID, a different combination of keys is pressed to play the sound. ShawzinBot also allows the usage of external MIDI devices, so you can connects to your computer as a MIDI device (keyboard, synthesizers, etc).
 
 # Download
