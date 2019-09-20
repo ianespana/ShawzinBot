@@ -41,22 +41,22 @@ namespace ShawzinBot
             { 57, new[] {0,3,1,0} }, // A3
             { 58, new[] {0,3,2,0} }, // A#3
             { 59, new[] {0,3,3,0} }, // B3
-            { 60, new[] {7,1,3,0} }, // C4
+            { 60, new[] {8,1,3,0} }, // C4
             { 61, new[] {4,2,1,0} }, // C#4
-            { 62, new[] {7,2,1,0} }, // D4
+            { 62, new[] {8,2,1,0} }, // D4
             { 63, new[] {1,2,2,0} }, // D#4
-            { 64, new[] {7,2,2,0} }, // E4
+            { 64, new[] {8,2,2,0} }, // E4
             { 65, new[] {1,2,3,0} }, // F4
             { 66, new[] {1,3,1,0} }, // F#4
-            { 67, new[] {7,2,3,0} }, // G4
-            { 68, new[] {7,3,1,1} }, // G#4
-            { 69, new[] {7,3,1,0} }, // A4
+            { 67, new[] {8,2,3,0} }, // G4
+            { 68, new[] {8,3,1,1} }, // G#4
+            { 69, new[] {8,3,1,0} }, // A4
             { 70, new[] {1,3,3,0} }, // A#4
             { 71, new[] {4,3,2,1} }, // B5
             { 72, new[] {4,3,2,0} }, // C5
             { 73, new[] {4,3,3,0} }, // C#5
-            { 74, new[] {7,3,3,0} }, // D5
-            { 75, new[] {6,3,3,0} }, // D#5
+            { 74, new[] {8,3,3,0} }, // D5
+            { 75, new[] {7,3,3,0} }, // D#5
         };
 
         private static Dictionary<int, Keys> shawzinFrets = new Dictionary<int, Keys>
@@ -81,7 +81,7 @@ namespace ShawzinBot
             { 1, Keys.Tab }, // Scale change
         };
 
-        private static int scaleSize = 8;
+        private static int scaleSize = 9;
 
         private static int activeScale = 0;
 
