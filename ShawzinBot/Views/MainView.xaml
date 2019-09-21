@@ -169,7 +169,7 @@
                     </Button>
                 <ComboBox x:Name="MidiInputs" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,8" Width="150" Height="30"
                           SelectedItem="{Binding Path=SelectedMidiInput, Mode=TwoWay}"
-                          DisplayMemberPath="DeviceName"/>
+                          DisplayMemberPath="DeviceName" Background="#FF353535"/>
             </Grid>
             <Grid Grid.Row="4" VerticalAlignment="Center" Background="#44444444" Height="90">
                 <TextBlock Text="Settings" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,5"/>
