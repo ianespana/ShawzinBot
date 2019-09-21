@@ -160,7 +160,7 @@ namespace ShawzinBot
                     }
                     else if (noteId > shawzinNotes.Keys.Last())
                     {
-                        noteId = shawzinNotes.Keys.Last() - 11 + noteId % 12;
+                        noteId = shawzinNotes.Keys.Last() - 15 + noteId % 12;
                     }
                 }
                 else
