@@ -144,13 +144,14 @@ namespace ShawzinBot
         /// <param name="note"> The note to be played.</param>
         /// <param name="enableVibrato"> Should we use vibrato to play unplayable notes?.</param>
         /// <param name="transposeNotes"> Should we transpose unplayable notes?.</param>
+        /// sending the lowest possible note (midinote 0) now signals the bot that the user has reset the scale to chromatic scale
         public static void PlayNote(NoteOnEvent note, bool enableVibrato, bool transposeNotes)
         {
             var hWnd = GetForegroundWindow();
             if (warframeWindow.Equals(IntPtr.Zero) || !hWnd.Equals(warframeWindow)) return;
 
             var noteId = (int) note.NoteNumber;
-            if (!shawzinNotes.ContainsKey(noteId))
+            if (!shawzinNotes.ContainsKey(noteId) && noteId != 0)
             {
                 if (transposeNotes)
                 {
@@ -167,6 +168,11 @@ namespace ShawzinBot
                 {
                     return;
                 }
+            }
+            else if (noteId == 0)
+            {
+                activeScale = 0; //tell the bot that the user put the scale to chromatic again
+                return;
             }
 
             var shawzinNote = shawzinNotes[noteId];
