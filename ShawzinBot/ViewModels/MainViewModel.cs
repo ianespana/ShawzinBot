@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ namespace ShawzinBot.ViewModels
         private string _currentTime = "0:00";
         private string _totalTime = "0:00";
         private string _playPauseIcon = "Play";
+        private string _scale = "Scale: Chromatic";
 
         private BindableCollection<MidiInputModel> _midiInputs = new BindableCollection<MidiInputModel>();
         private MidiInputModel _selectedMidiInput;
@@ -34,6 +36,18 @@ namespace ShawzinBot.ViewModels
         private bool _enableVibrato = true;
         private bool _transposeNotes = true;
         private bool _playThroughSpeakers;
+
+        private string[] ScaleArray = {
+            "Chromatic",
+            "Hexatonic",
+            "Major",
+            "Minor",
+            "Hirajoshi",
+            "Phrygian",
+            "Yo",
+            "Pentatonic Minor",
+            "Pentatonic Major"
+        };
 
         #endregion
 
@@ -195,6 +209,16 @@ namespace ShawzinBot.ViewModels
             }
         }
 
+        public string Scale
+        {
+            get => _scale;
+            set
+            {
+                _scale = value;
+                NotifyOfPropertyChange(() => Scale);
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -276,10 +300,12 @@ namespace ShawzinBot.ViewModels
                     playback.OutputDevice = OutputDevice.GetById(0);
                 }
 
-				ActionManager.OnSongPlay();
+                ActionManager.OnSongPlay();
+                while (!ActionManager.IsWindowFocused("Warframe")) { }
 
                 playback.Start();
             }
+            UpdateScale(ActionManager.activeScale);
         }
 
         public void Previous()
@@ -310,6 +336,11 @@ namespace ShawzinBot.ViewModels
             SelectedMidiInput = MidiInputs[0];
         }
 
+        public void UpdateScale(int scaleIndex) 
+        {
+            Scale = "Scale: " + ScaleArray[scaleIndex];
+        }
+
         #endregion
 
         #region EventHandlers
@@ -332,7 +363,8 @@ namespace ShawzinBot.ViewModels
             var note = e.Event as NoteOnEvent;
             if (note != null && note.Velocity <= 0) return;
 
-            ActionManager.PlayNote(note, EnableVibrato, TransposeNotes);
+            //Check if the user has tabbed out of warframe, and stop playback to avoid Scale issues
+            if (!ActionManager.PlayNote(note, EnableVibrato, TransposeNotes)) PlayPause();
         }
 
         public void OnNoteEvent(object sender, MidiEventReceivedEventArgs e)

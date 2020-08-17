@@ -83,7 +83,7 @@ namespace ShawzinBot
 
         private static int scaleSize = 9;
 
-        private static int activeScale = 0;
+        public static int activeScale = 0;
 
         private static bool vibratoActive = false;
 
@@ -106,6 +106,8 @@ namespace ShawzinBot
             public Rectangle rcNormalPosition;
             public Rectangle rcDevice;
         }
+
+
 
         [DllImport("user32.dll")]
         public static extern IntPtr FindWindow(string className, string windowTitle);
@@ -138,16 +140,20 @@ namespace ShawzinBot
         [DllImport("user32.dll")]
         private static extern Int32 SendMessage(IntPtr hWnd, UInt32 Msg, char wParam, UInt32 lParam);
 
+        [DllImport("user32.dll")]
+        static extern void SwitchToThisWindow(IntPtr hWnd, bool fUnknown);
+
         /// <summary>
         /// Play a MIDI note inside Warframe.
         /// </summary>
         /// <param name="note"> The note to be played.</param>
         /// <param name="enableVibrato"> Should we use vibrato to play unplayable notes?.</param>
         /// <param name="transposeNotes"> Should we transpose unplayable notes?.</param>
-        public static void PlayNote(NoteOnEvent note, bool enableVibrato, bool transposeNotes)
+        public static bool PlayNote(NoteOnEvent note, bool enableVibrato, bool transposeNotes)
         {
-            var hWnd = GetForegroundWindow();
-            if (warframeWindow.Equals(IntPtr.Zero) || !hWnd.Equals(warframeWindow)) return;
+            //var hWnd = GetForegroundWindow();
+            //if (warframeWindow.Equals(IntPtr.Zero) || !hWnd.Equals(warframeWindow)) return false;
+            if (!IsWindowFocused("Warframe")) return false;
 
             var noteId = (int) note.NoteNumber;
             if (!shawzinNotes.ContainsKey(noteId))
@@ -165,12 +171,13 @@ namespace ShawzinBot
                 }
                 else
                 {
-                    return;
+                    return false;
                 }
             }
 
             var shawzinNote = shawzinNotes[noteId];
             PlayNote(noteId, enableVibrato, transposeNotes);
+            return true;
         }
 
         /// <summary>
@@ -246,38 +253,56 @@ namespace ShawzinBot
         /// Bring a window to the front and activate it.
         /// </summary>
         /// <param name="windowName"> The name of the window we're looking for.</param>
-        public static void BringWindowToFront(string windowName)
-        {
-            IntPtr wdwIntPtr = FindWindow(windowName, null);
-			BringWindowToFront(wdwIntPtr);
-        }
+  //      public static void BringWindowToFront(string windowName)
+  //      {
+  //          IntPtr wdwIntPtr = FindWindow(windowName, null);
+		//	BringWindowToFront(wdwIntPtr);
+  //      }
 
-        /// <summary>
-        /// Bring a window to the front and activate it.
-        /// </summary>
-        /// <param name="wdwIntPtr"> The pointer to the window we're looking for.</param>
-		public static void BringWindowToFront(IntPtr wdwIntPtr)
-		{
-			//get the hWnd of the process
-			WindowPlacement placement = new WindowPlacement();
-			GetWindowPlacement(wdwIntPtr, ref placement);
+  //      /// <summary>
+  //      /// Bring a window to the front and activate it.
+  //      /// </summary>
+  //      /// <param name="wdwIntPtr"> The pointer to the window we're looking for.</param>
+		//public static void BringWindowToFront(IntPtr wdwIntPtr)
+		//{
+		//	//get the hWnd of the process
+		//	WindowPlacement placement = new WindowPlacement();
+		//	GetWindowPlacement(wdwIntPtr, ref placement);
 
-			// Check if window is minimized
-			if (placement.showCmd == 2)
-			{
-				//the window is hidden so we restore it
-				ShowWindow(wdwIntPtr, ShowWindowEnum.Restore);
-			}
+		//	// Check if window is minimized
+		//	if (placement.showCmd == 2)
+		//	{
+		//		//the window is hidden so we restore it
+		//		ShowWindow(wdwIntPtr, ShowWindowEnum.Restore);
+		//	}
 
-			//set user's focus to the window
-			int focusResult = SetForegroundWindow(wdwIntPtr);
-			Console.WriteLine(focusResult);
-		}
+		//	//set user's focus to the window
+		//	int focusResult = SetForegroundWindow(wdwIntPtr);
+		//	Console.WriteLine(focusResult);
+		//}
 
-        public static void OnSongPlay()
+        public static bool OnSongPlay()
         {
             warframeWindow = FindWindow("Warframe");
-            BringWindowToFront(warframeWindow);
+            //BringWindowToFront(warframeWindow);
+            SwitchToThisWindow(warframeWindow, true);
+            var hWnd = GetForegroundWindow();
+            if (warframeWindow.Equals(IntPtr.Zero) || !hWnd.Equals(warframeWindow)) return false;
+            return true;
         }
+
+        public static bool IsWindowFocused(IntPtr windowPtr)
+        {
+            var hWnd = GetForegroundWindow();
+            if (windowPtr.Equals(IntPtr.Zero) || !hWnd.Equals(windowPtr)) return false;
+            return true;
+        }
+
+        public static bool IsWindowFocused(string windowName)
+        {
+            var windowPtr = FindWindow(windowName);
+            return IsWindowFocused(windowPtr);
+        }
+
     }
 }
