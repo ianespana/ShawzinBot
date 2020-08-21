@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Melanchall.DryWetMidi.Devices;
 
 namespace ShawzinBot.Views
 {
@@ -33,6 +34,7 @@ namespace ShawzinBot.Views
 
         public void OnCloseProgram(object sender, RoutedEventArgs e)
         {
+            PlaybackCurrentTimeWatcher.Instance.Dispose();
             this.Close();
         }
 
