@@ -52,7 +52,7 @@ namespace ShawzinBot
             { 68, new[] {6,2,3,0} }, // G#4
             { 69, new[] {8,3,1,0} }, // A4
             { 70, new[] {1,3,3,0} }, // A#4
-            { 71, new[] {4,3,2,1} }, // B4
+            { 71, new[] {4,3,2,1} }, // B5
             { 72, new[] {4,3,2,0} }, // C5
             { 73, new[] {4,3,3,0} }, // C#5
             { 74, new[] {8,3,3,0} }, // D5
@@ -83,7 +83,7 @@ namespace ShawzinBot
 
         private static int scaleSize = 9;
 
-        public static int activeScale = 0;
+        private static int activeScale = 0;
 
         private static bool vibratoActive = false;
 
@@ -106,8 +106,6 @@ namespace ShawzinBot
             public Rectangle rcNormalPosition;
             public Rectangle rcDevice;
         }
-
-
 
         [DllImport("user32.dll")]
         public static extern IntPtr FindWindow(string className, string windowTitle);
@@ -140,23 +138,20 @@ namespace ShawzinBot
         [DllImport("user32.dll")]
         private static extern Int32 SendMessage(IntPtr hWnd, UInt32 Msg, char wParam, UInt32 lParam);
 
-        [DllImport("user32.dll")]
-        static extern void SwitchToThisWindow(IntPtr hWnd, bool fUnknown);
-
         /// <summary>
         /// Play a MIDI note inside Warframe.
         /// </summary>
         /// <param name="note"> The note to be played.</param>
         /// <param name="enableVibrato"> Should we use vibrato to play unplayable notes?.</param>
         /// <param name="transposeNotes"> Should we transpose unplayable notes?.</param>
-        public static bool PlayNote(NoteOnEvent note, bool enableVibrato, bool transposeNotes)
+        /// sending the lowest possible note (midinote 0) now signals the bot that the user has reset the scale to chromatic scale
+        public static void PlayNote(NoteOnEvent note, bool enableVibrato, bool transposeNotes)
         {
-            //var hWnd = GetForegroundWindow();
-            //if (warframeWindow.Equals(IntPtr.Zero) || !hWnd.Equals(warframeWindow)) return false;
-            if (!IsWindowFocused("Warframe")) return false;
+            var hWnd = GetForegroundWindow();
+            if (warframeWindow.Equals(IntPtr.Zero) || !hWnd.Equals(warframeWindow)) return;
 
             var noteId = (int) note.NoteNumber;
-            if (!shawzinNotes.ContainsKey(noteId))
+            if (!shawzinNotes.ContainsKey(noteId) && noteId != 0)
             {
                 if (transposeNotes)
                 {
@@ -166,18 +161,22 @@ namespace ShawzinBot
                     }
                     else if (noteId > shawzinNotes.Keys.Last())
                     {
-                        noteId = shawzinNotes.Keys.Last() - 15 + noteId % 12;
+                        noteId = shawzinNotes.Keys.Last() - 11 + noteId % 12;
                     }
                 }
                 else
                 {
-                    return false;
+                    return;
                 }
+            }
+            else if (noteId == 0)
+            {
+                activeScale = 0; //tell the bot that the user put the scale to chromatic again
+                return;
             }
 
             var shawzinNote = shawzinNotes[noteId];
             PlayNote(noteId, enableVibrato, transposeNotes);
-            return true;
         }
 
         /// <summary>
@@ -253,56 +252,38 @@ namespace ShawzinBot
         /// Bring a window to the front and activate it.
         /// </summary>
         /// <param name="windowName"> The name of the window we're looking for.</param>
-  //      public static void BringWindowToFront(string windowName)
-  //      {
-  //          IntPtr wdwIntPtr = FindWindow(windowName, null);
-		//	BringWindowToFront(wdwIntPtr);
-  //      }
+        public static void BringWindowToFront(string windowName)
+        {
+            IntPtr wdwIntPtr = FindWindow(windowName, null);
+			BringWindowToFront(wdwIntPtr);
+        }
 
-  //      /// <summary>
-  //      /// Bring a window to the front and activate it.
-  //      /// </summary>
-  //      /// <param name="wdwIntPtr"> The pointer to the window we're looking for.</param>
-		//public static void BringWindowToFront(IntPtr wdwIntPtr)
-		//{
-		//	//get the hWnd of the process
-		//	WindowPlacement placement = new WindowPlacement();
-		//	GetWindowPlacement(wdwIntPtr, ref placement);
+        /// <summary>
+        /// Bring a window to the front and activate it.
+        /// </summary>
+        /// <param name="wdwIntPtr"> The pointer to the window we're looking for.</param>
+		public static void BringWindowToFront(IntPtr wdwIntPtr)
+		{
+			//get the hWnd of the process
+			WindowPlacement placement = new WindowPlacement();
+			GetWindowPlacement(wdwIntPtr, ref placement);
 
-		//	// Check if window is minimized
-		//	if (placement.showCmd == 2)
-		//	{
-		//		//the window is hidden so we restore it
-		//		ShowWindow(wdwIntPtr, ShowWindowEnum.Restore);
-		//	}
+			// Check if window is minimized
+			if (placement.showCmd == 2)
+			{
+				//the window is hidden so we restore it
+				ShowWindow(wdwIntPtr, ShowWindowEnum.Restore);
+			}
 
-		//	//set user's focus to the window
-		//	int focusResult = SetForegroundWindow(wdwIntPtr);
-		//	Console.WriteLine(focusResult);
-		//}
+			//set user's focus to the window
+			int focusResult = SetForegroundWindow(wdwIntPtr);
+			Console.WriteLine(focusResult);
+		}
 
-        public static bool OnSongPlay()
+        public static void OnSongPlay()
         {
             warframeWindow = FindWindow("Warframe");
-            //BringWindowToFront(warframeWindow);
-            SwitchToThisWindow(warframeWindow, true);
-            var hWnd = GetForegroundWindow();
-            if (warframeWindow.Equals(IntPtr.Zero) || !hWnd.Equals(warframeWindow)) return false;
-            return true;
+            BringWindowToFront(warframeWindow);
         }
-
-        public static bool IsWindowFocused(IntPtr windowPtr)
-        {
-            var hWnd = GetForegroundWindow();
-            if (windowPtr.Equals(IntPtr.Zero) || !hWnd.Equals(windowPtr)) return false;
-            return true;
-        }
-
-        public static bool IsWindowFocused(string windowName)
-        {
-            var windowPtr = FindWindow(windowName);
-            return IsWindowFocused(windowPtr);
-        }
-
     }
 }
