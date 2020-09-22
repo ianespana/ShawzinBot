@@ -15,7 +15,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
-        Title="MainView" Height="381.667" Width="300">
+        Title="MainView" Height="380" Width="300">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>
@@ -25,8 +25,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="20"/>
-            <RowDefinition/>
-            <RowDefinition Height="21"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3">
@@ -68,7 +68,7 @@
             </Button>
         </Grid>
 
-        <Grid Grid.Column="1" Grid.Row="2" VerticalAlignment="Top" Height="290" Grid.RowSpan="2">
+        <Grid Grid.Column="1" Grid.Row="2" VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -77,7 +77,7 @@
                 <RowDefinition Height="80"/>
                 <RowDefinition Height="40"/>
                 <RowDefinition Height="70"/>
-                <RowDefinition Height="100"/>
+                <RowDefinition Height="120"/>
             </Grid.RowDefinitions>
 
             <Ellipse Grid.Row="0" Width="150" Height="150" HorizontalAlignment="Center" VerticalAlignment="Center" StrokeThickness="1">
@@ -169,14 +169,14 @@
                 </Button>
                 <ComboBox x:Name="MidiInputs" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,8" Width="150" Height="30"
                           SelectedItem="{Binding Path=SelectedMidiInput, Mode=TwoWay}"
-                          DisplayMemberPath="DeviceName" Background="#FF353535"/>
+                          DisplayMemberPath="DeviceName"/>
             </Grid>
-            <Grid Grid.Row="4" Background="#44444444" Margin="0,0,0,-24">
-                <TextBlock Text="Settings" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,10,0,0"/>
-                <CheckBox x:Name="EnableVibrato" Content="Enable whammy" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,54,0,0" ClickMode="Press"/>
-                <CheckBox x:Name="TransposeNotes" Content="Transpose notes" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,75,0,0" ClickMode="Press"/>
-                <CheckBox x:Name="PlayThroughSpeakers" Content="Play MIDI through speakers" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,96,0,0" ClickMode="Press"/>
-                <TextBlock x:Name="Scale" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Scale: Chromatic" VerticalAlignment="Top" Margin="10,32,0,0"/>
+            <Grid Grid.Row="4" VerticalAlignment="Center" Background="#44444444" Height="110">
+                <TextBlock Text="Settings" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,5"/>
+                <TextBlock x:Name="Scale" Text="Scale: Chromatic" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,25"/>
+                <CheckBox x:Name="EnableVibrato" Content="Enable vibrato" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,45,0,0" ClickMode="Press"/>
+                <CheckBox x:Name="TransposeNotes" Content="Transpose notes" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,65,0,0" ClickMode="Press"/>
+                <CheckBox x:Name="PlayThroughSpeakers" Content="Play MIDI through speakers" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,85,0,0" ClickMode="Press"/>
             </Grid>
         </Grid>
     </Grid>
