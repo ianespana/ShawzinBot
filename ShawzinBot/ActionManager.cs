@@ -55,7 +55,7 @@ namespace ShawzinBot
 
         private static Dictionary<int, Keys> shawzinFrets = new Dictionary<int, Keys>
         {
-            { 0, Keys.None }, // Sky Fret
+            { 0, Keys.None }, // No Fret
             { 1, Keys.Left }, // Sky Fret
             { 2, Keys.Down }, // Earth Fret
             { 3, Keys.Right }, // Water Fret
@@ -80,6 +80,9 @@ namespace ShawzinBot
         public static int activeScale = 0;
 
         private static bool vibratoActive = false;
+
+        private static Keys fretKey;
+        private static Keys vibratoKey;
 
         private enum ShowWindowEnum
         {
@@ -185,20 +188,21 @@ namespace ShawzinBot
             var shawzinNote = shawzinNotes[noteId];
             SetScale(shawzinNote[0]);
             var stringKey = shawzinStrings[shawzinNote[2]];
-            var fretKey = shawzinFrets[shawzinNote[1]];
 
-            var vibratoKey = shawzinSpecial[0];
+            Keyboard.KeyUp(fretKey);
+            fretKey = shawzinFrets[shawzinNote[1]];
+
+            Keyboard.KeyUp(vibratoKey);
+            vibratoKey = shawzinSpecial[0];
 
             if (shawzinNote[3] == 1 && enableVibrato)
             {
                 KeyHold(vibratoKey, TimeSpan.FromMilliseconds(100));
-                //Keyboard.KeyDown(vibratoKey);
+                Keyboard.KeyDown(vibratoKey);
             }
 
             Keyboard.KeyDown(fretKey);
             KeyTap(stringKey);
-            Keyboard.KeyUp(fretKey);
-            //Keyboard.KeyUp(vibratoKey);
         }
 
         public static void SetScale(int scaleIndex)
