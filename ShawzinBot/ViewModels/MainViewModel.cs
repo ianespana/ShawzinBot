@@ -362,7 +362,7 @@ namespace ShawzinBot.ViewModels
                 }
 
                 ActionManager.OnSongPlay();
-                //while (!ActionManager.IsWindowFocused("Warframe")) { }
+                while (!ActionManager.IsWindowFocused("Warframe")) { }
                 playback.Start();
             }
             UpdateScale(ActionManager.activeScale);
@@ -429,7 +429,7 @@ namespace ShawzinBot.ViewModels
                     if (note != null && note.Velocity <= 0) return;
 
                     //Check if the user has tabbed out of warframe, and stop playback to avoid Scale issues
-                    //if (!ActionManager.PlayNote(note, EnableVibrato, TransposeNotes)) PlayPause();
+                    if (!ActionManager.PlayNote(note, EnableVibrato, TransposeNotes)) PlayPause();
                     return;
                 default:
                     return;
