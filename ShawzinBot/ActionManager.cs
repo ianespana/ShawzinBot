@@ -124,8 +124,8 @@ namespace ShawzinBot
         [DllImport("user32.dll")]
         private static extern int SetForegroundWindow(IntPtr hwnd);
 
-		[DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-		private static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        private static extern IntPtr GetForegroundWindow();
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -155,7 +155,7 @@ namespace ShawzinBot
             //if (warframeWindow.Equals(IntPtr.Zero) || !hWnd.Equals(warframeWindow)) return false;
             if (!IsWindowFocused("Warframe")) return false;
 
-            var noteId = (int) note.NoteNumber;
+            var noteId = (int)note.NoteNumber;
             if (!shawzinNotes.ContainsKey(noteId))
             {
                 if (transposeNotes)
@@ -233,10 +233,10 @@ namespace ShawzinBot
         /// </summary>
         /// <param name="key"> The key to be tapped.</param>
         public static void KeyTap(Keys key)
-		{
-			Keyboard.KeyDown(key);
-			Keyboard.KeyUp(key);
-		}
+        {
+            Keyboard.KeyDown(key);
+            Keyboard.KeyUp(key);
+        }
 
         /// <summary>
         /// Hold key for certain amount of time and release. (UNTESTED)
@@ -244,42 +244,42 @@ namespace ShawzinBot
         /// <param name="key"> The key to be held.</param>
         /// <param name="time"> The amount of time the key should be held for.</param>
         public static void KeyHold(Keys key, TimeSpan time)
-		{
-			Keyboard.KeyDown(key);
-            new Timer(state=>Keyboard.KeyUp(key), null, time, Timeout.InfiniteTimeSpan);
+        {
+            Keyboard.KeyDown(key);
+            new Timer(state => Keyboard.KeyUp(key), null, time, Timeout.InfiniteTimeSpan);
         }
 
         /// <summary>
         /// Bring a window to the front and activate it.
         /// </summary>
         /// <param name="windowName"> The name of the window we're looking for.</param>
-  //      public static void BringWindowToFront(string windowName)
-  //      {
-  //          IntPtr wdwIntPtr = FindWindow(windowName, null);
-		//	BringWindowToFront(wdwIntPtr);
-  //      }
+        //      public static void BringWindowToFront(string windowName)
+        //      {
+        //          IntPtr wdwIntPtr = FindWindow(windowName, null);
+        //	BringWindowToFront(wdwIntPtr);
+        //      }
 
-  //      /// <summary>
-  //      /// Bring a window to the front and activate it.
-  //      /// </summary>
-  //      /// <param name="wdwIntPtr"> The pointer to the window we're looking for.</param>
-		//public static void BringWindowToFront(IntPtr wdwIntPtr)
-		//{
-		//	//get the hWnd of the process
-		//	WindowPlacement placement = new WindowPlacement();
-		//	GetWindowPlacement(wdwIntPtr, ref placement);
+        //      /// <summary>
+        //      /// Bring a window to the front and activate it.
+        //      /// </summary>
+        //      /// <param name="wdwIntPtr"> The pointer to the window we're looking for.</param>
+        //public static void BringWindowToFront(IntPtr wdwIntPtr)
+        //{
+        //	//get the hWnd of the process
+        //	WindowPlacement placement = new WindowPlacement();
+        //	GetWindowPlacement(wdwIntPtr, ref placement);
 
-		//	// Check if window is minimized
-		//	if (placement.showCmd == 2)
-		//	{
-		//		//the window is hidden so we restore it
-		//		ShowWindow(wdwIntPtr, ShowWindowEnum.Restore);
-		//	}
+        //	// Check if window is minimized
+        //	if (placement.showCmd == 2)
+        //	{
+        //		//the window is hidden so we restore it
+        //		ShowWindow(wdwIntPtr, ShowWindowEnum.Restore);
+        //	}
 
-		//	//set user's focus to the window
-		//	int focusResult = SetForegroundWindow(wdwIntPtr);
-		//	Console.WriteLine(focusResult);
-		//}
+        //	//set user's focus to the window
+        //	int focusResult = SetForegroundWindow(wdwIntPtr);
+        //	Console.WriteLine(focusResult);
+        //}
 
         public static bool OnSongPlay()
         {
