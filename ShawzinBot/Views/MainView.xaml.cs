@@ -32,10 +32,5 @@ namespace ShawzinBot.Views
         {
             this.WindowState = WindowState.Minimized;
         }
-
-        private void MidiTracksSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            MidiTracks.SelectedItem = null;
-        }
     }
 }
