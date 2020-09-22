@@ -32,12 +32,13 @@ namespace ShawzinBot.ViewModels
         private string _scale = "Scale: Chromatic";
         
         private BindableCollection<MidiInputModel> _midiInputs = new BindableCollection<MidiInputModel>();
-        private BindableCollection<MidiTrackModel> _midiChannels = new BindableCollection<MidiTrackModel>();
+        private BindableCollection<MidiTrackModel> _midiTracks = new BindableCollection<MidiTrackModel>();
         private MidiInputModel _selectedMidiInput;
 
         private bool _enableVibrato = true;
         private bool _transposeNotes = true;
         private bool _playThroughSpeakers;
+        private bool _ignoreSliderChange;
 
         private string[] ScaleArray = {
             "Chromatic",
@@ -62,6 +63,8 @@ namespace ShawzinBot.ViewModels
         public TempoMap tempoMap;
         public Playback playback;
         public InputDevice inputDevice;
+
+        public static bool reloadPlayback;
 
         #endregion
 
@@ -125,6 +128,19 @@ namespace ShawzinBot.ViewModels
             {
                 _songSlider = value;
                 NotifyOfPropertyChange(() => SongSlider);
+                if (!_ignoreSliderChange && playback != null)
+                {
+                    if (playback.IsRunning)
+                    {
+                        playback.Stop();
+                        PlayPauseIcon = "Play";
+                    }
+                    TimeSpan time = TimeSpan.FromSeconds(_songSlider);
+
+                    CurrentTime = time.ToString("m\\:ss");
+                    playback.MoveToTime((MetricTimeSpan) time);
+                }
+                _ignoreSliderChange = false;
             }
         }
 
@@ -160,10 +176,10 @@ namespace ShawzinBot.ViewModels
 
         public BindableCollection<MidiTrackModel> MidiTracks
         {
-            get => _midiChannels;
+            get => _midiTracks;
             set
             {
-                _midiChannels = value;
+                _midiTracks = value;
                 NotifyOfPropertyChange(() => MidiTracks);
             }
         }
@@ -255,7 +271,7 @@ namespace ShawzinBot.ViewModels
             TimeSpan midiFileDuration = midiFile.GetDuration<MetricTimeSpan>();
             TotalTime = midiFileDuration.ToString("m\\:ss");
             MaximumTime = midiFileDuration.TotalSeconds;
-            SongSlider = 0;
+            UpdateSlider(0);
             CurrentTime = "0:00";
             metaTrack = midiFile.GetTrackChunks().FirstOrDefault();
             midiFile.Chunks.Remove(metaTrack);
@@ -294,8 +310,18 @@ namespace ShawzinBot.ViewModels
         public void PlayPause()
         {
             if (midiFile == null || MaximumTime == 0d) return;
-            if (playback == null)
+            if (playback == null || reloadPlayback)
             {
+                ITimeSpan playTime = new MidiTimeSpan();
+                if (playback != null)
+                {
+                    playback.Stop();
+                    playTime = playback.GetCurrentTime(TimeSpanType.Midi);
+                    playback.OutputDevice?.Dispose();
+                    playback = null;
+                    PlayPauseIcon = "Play";
+                }
+
                 midiFile.Chunks.Clear();
                 midiFile.Chunks.Add(metaTrack);
 
@@ -308,7 +334,7 @@ namespace ShawzinBot.ViewModels
                 }
 
                 playback = midiFile.GetPlayback();
-
+                playback.MoveToTime(playTime);
                 playback.Finished += (s, e) =>
                 {
                     CloseFile();
@@ -319,6 +345,7 @@ namespace ShawzinBot.ViewModels
                 PlaybackCurrentTimeWatcher.Instance.Start();
 
                 playback.EventPlayed += OnNoteEvent;
+                reloadPlayback = false;
             }
 
             if (playback.IsRunning)
@@ -354,7 +381,7 @@ namespace ShawzinBot.ViewModels
             if (playback != null)
             {
                 playback.MoveToStart();
-                SongSlider = 0;
+                UpdateSlider(0);
                 CurrentTime = "0:00";
             }
         }
@@ -392,7 +419,7 @@ namespace ShawzinBot.ViewModels
             {
                 TimeSpan time = (MetricTimeSpan) playbackTime.Time;
 
-                SongSlider = time.TotalSeconds;
+                UpdateSlider(time.TotalSeconds);
                 CurrentTime = time.ToString("m\\:ss");
             }
         }
@@ -425,6 +452,12 @@ namespace ShawzinBot.ViewModels
             if (note != null && note.Velocity <= 0) return;
 
             ActionManager.PlayNote(note, EnableVibrato, TransposeNotes);
+        }
+
+        private void UpdateSlider(double value)
+        {
+            _ignoreSliderChange = true;
+            SongSlider = value;
         }
 
         #endregion
