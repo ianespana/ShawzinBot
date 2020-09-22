@@ -173,7 +173,7 @@
             </Grid>
             <Grid Grid.Row="4" Background="#44444444" Margin="0,0,0,-24">
                 <TextBlock Text="Settings" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,10,0,0"/>
-                <CheckBox x:Name="EnableVibrato" Content="Enable vibrato" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,54,0,0" ClickMode="Press"/>
+                <CheckBox x:Name="EnableVibrato" Content="Enable whammy" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,54,0,0" ClickMode="Press"/>
                 <CheckBox x:Name="TransposeNotes" Content="Transpose notes" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,75,0,0" ClickMode="Press"/>
                 <CheckBox x:Name="PlayThroughSpeakers" Content="Play MIDI through speakers" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,96,0,0" ClickMode="Press"/>
                 <TextBlock x:Name="Scale" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Scale: Chromatic" VerticalAlignment="Top" Margin="10,32,0,0"/>
