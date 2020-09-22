@@ -7,15 +7,15 @@ You can always get the latest version of ShawzinBot [here](https://github.com/ia
 
 # About
 
-What's the ShawzinBot?
+### What's the ShawzinBot?
 
 ShawzinBot is a third party software that can read MIDI files (.mid) and play their content in Warframe. It simulates key presses, and that's how the Shawzin is played.
 
-Is it safe?
+### Is it safe?
 
 ShawzinBot does not in any way interfere with gameplay, nor does it inject new code or modify existing one. It also does not tamper with memory in any way, thus is can't be catalogued as a cheat and should be safe to use.
 
-How does it work?
+### How does it work?
 
 ShawzinBot is built on the C# [DryWetMIDI midi library by melanchall](https://github.com/melanchall/drywetmidi). This library loads a MIDI file and plays it. Every note event is intercepted by ShawzinBot and depending on note's ID, a different combination of keys is pressed to play the sound. ShawzinBot also allows the usage of external MIDI devices (keyboard, synthesizers, etc).
 
