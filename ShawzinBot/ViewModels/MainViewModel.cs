@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Caliburn.Micro;
+using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Devices;
 using Melanchall.DryWetMidi.Smf;
 using Melanchall.DryWetMidi.Smf.Interaction;
@@ -29,8 +30,9 @@ namespace ShawzinBot.ViewModels
         private string _totalTime = "0:00";
         private string _playPauseIcon = "Play";
         private string _scale = "Scale: Chromatic";
-
+        
         private BindableCollection<MidiInputModel> _midiInputs = new BindableCollection<MidiInputModel>();
+        private BindableCollection<MidiTrackModel> _midiChannels = new BindableCollection<MidiTrackModel>();
         private MidiInputModel _selectedMidiInput;
 
         private bool _enableVibrato = true;
@@ -48,6 +50,9 @@ namespace ShawzinBot.ViewModels
             "Pentatonic Minor",
             "Pentatonic Major"
         };
+
+        private TrackChunk metaTrack;
+        private TrackChunk firstTrack;
 
         #endregion
 
@@ -153,6 +158,16 @@ namespace ShawzinBot.ViewModels
             }
         }
 
+        public BindableCollection<MidiTrackModel> MidiTracks
+        {
+            get => _midiChannels;
+            set
+            {
+                _midiChannels = value;
+                NotifyOfPropertyChange(() => MidiTracks);
+            }
+        }
+
         public MidiInputModel SelectedMidiInput
         {
             get => _selectedMidiInput;
@@ -230,6 +245,8 @@ namespace ShawzinBot.ViewModels
             if (openFileDialog.ShowDialog() != true) return;
 
             CloseFile();
+            MidiTracks.Clear();
+
             midiFile = MidiFile.Read(openFileDialog.FileName);
             SongName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
 
@@ -240,19 +257,16 @@ namespace ShawzinBot.ViewModels
             MaximumTime = midiFileDuration.TotalSeconds;
             SongSlider = 0;
             CurrentTime = "0:00";
+            metaTrack = midiFile.GetTrackChunks().FirstOrDefault();
+            midiFile.Chunks.Remove(metaTrack);
+            firstTrack = midiFile.GetTrackChunks().FirstOrDefault();
+            midiFile.Chunks.Remove(firstTrack);
+            MidiTracks.Add(new MidiTrackModel(firstTrack, true));
 
-            playback = midiFile.GetPlayback(OutputDevice.GetById(0));
-
-            playback.Finished += (s, e) =>
+            foreach (TrackChunk track in midiFile.GetTrackChunks())
             {
-                CloseFile();
-            };
-
-            PlaybackCurrentTimeWatcher.Instance.AddPlayback(playback, TimeSpanType.Metric);
-            PlaybackCurrentTimeWatcher.Instance.CurrentTimeChanged += OnTick;
-            PlaybackCurrentTimeWatcher.Instance.Start();
-
-            playback.EventPlayed += OnNoteEvent;
+                MidiTracks.Add(new MidiTrackModel(track));
+            }
         }
 
         public void CloseFile()
@@ -280,6 +294,33 @@ namespace ShawzinBot.ViewModels
         public void PlayPause()
         {
             if (midiFile == null || MaximumTime == 0d) return;
+            if (playback == null)
+            {
+                midiFile.Chunks.Clear();
+                midiFile.Chunks.Add(metaTrack);
+
+                foreach (MidiTrackModel trackModel in MidiTracks)
+                {
+                    if (trackModel.IsChecked)
+                    {
+                        midiFile.Chunks.Add(trackModel.Track);
+                    }
+                }
+
+                playback = midiFile.GetPlayback();
+
+                playback.Finished += (s, e) =>
+                {
+                    CloseFile();
+                };
+
+                PlaybackCurrentTimeWatcher.Instance.AddPlayback(playback, TimeSpanType.Metric);
+                PlaybackCurrentTimeWatcher.Instance.CurrentTimeChanged += OnTick;
+                PlaybackCurrentTimeWatcher.Instance.Start();
+
+                playback.EventPlayed += OnNoteEvent;
+            }
+
             if (playback.IsRunning)
             {
                 PlayPauseIcon = "Play";
@@ -290,6 +331,7 @@ namespace ShawzinBot.ViewModels
                 PlayPauseIcon = "Pause";
 
                 var device = OutputDevice.GetById(0);
+
                 if (!PlayThroughSpeakers && playback.OutputDevice != null)
                 {
                     playback.OutputDevice.Dispose();
@@ -297,12 +339,11 @@ namespace ShawzinBot.ViewModels
                 }
                 else if (PlayThroughSpeakers && (playback.OutputDevice == null || playback.OutputDevice.ProductIdentifier != device.ProductIdentifier))
                 {
-                    playback.OutputDevice = OutputDevice.GetById(0);
+                    playback.OutputDevice = device;
                 }
 
                 ActionManager.OnSongPlay();
-                while (!ActionManager.IsWindowFocused("Warframe")) { }
-
+                //while (!ActionManager.IsWindowFocused("Warframe")) { }
                 playback.Start();
             }
             UpdateScale(ActionManager.activeScale);
@@ -358,13 +399,22 @@ namespace ShawzinBot.ViewModels
 
         public void OnNoteEvent(object sender, MidiEventPlayedEventArgs e)
         {
-            if (e.Event.EventType != MidiEventType.NoteOn) return;
+            switch (e.Event.EventType)
+            {
+                case MidiEventType.SetTempo:
+                    var tempo = e.Event as SetTempoEvent;
+                    playback.Speed = tempo.MicrosecondsPerQuarterNote;
+                    return;
+                case MidiEventType.NoteOn:
+                    var note = e.Event as NoteOnEvent;
+                    if (note != null && note.Velocity <= 0) return;
 
-            var note = e.Event as NoteOnEvent;
-            if (note != null && note.Velocity <= 0) return;
-
-            //Check if the user has tabbed out of warframe, and stop playback to avoid Scale issues
-            if (!ActionManager.PlayNote(note, EnableVibrato, TransposeNotes)) PlayPause();
+                    //Check if the user has tabbed out of warframe, and stop playback to avoid Scale issues
+                    //if (!ActionManager.PlayNote(note, EnableVibrato, TransposeNotes)) PlayPause();
+                    return;
+                default:
+                    return;
+            }
         }
 
         public void OnNoteEvent(object sender, MidiEventReceivedEventArgs e)

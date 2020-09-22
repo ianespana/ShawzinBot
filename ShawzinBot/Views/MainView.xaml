@@ -15,7 +15,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
-        Title="MainView" Height="380" Width="300">
+        Title="MainView" Height="450" Width="300">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>
@@ -76,6 +76,7 @@
                 <RowDefinition Height="0"/>
                 <RowDefinition Height="80"/>
                 <RowDefinition Height="40"/>
+                <RowDefinition Height="70"/>
                 <RowDefinition Height="70"/>
                 <RowDefinition Height="120"/>
             </Grid.RowDefinitions>
@@ -167,11 +168,21 @@
                         </materialDesign:PackIcon.Foreground>
                     </materialDesign:PackIcon>
                 </Button>
-                <ComboBox x:Name="MidiInputs" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,8" Width="150" Height="30"
+                <ComboBox x:Name="MidiInputs" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,8" Width="150" Height="30" Background="#FF444444"
                           SelectedItem="{Binding Path=SelectedMidiInput, Mode=TwoWay}"
                           DisplayMemberPath="DeviceName"/>
             </Grid>
-            <Grid Grid.Row="4" VerticalAlignment="Center" Background="#44444444" Height="110">
+            <Grid Grid.Row="4" VerticalAlignment="Center" Background="#44444444" Height="60">
+                <TextBlock Text="MIDI Tracks" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,5"/>
+                <ComboBox x:Name="MidiTracks" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,8" Width="240" Height="30" Background="#FF444444" SelectionChanged="MidiTracksSelectionChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox x:Name="MidiTrack" Content="{Binding TrackName}" IsChecked="{Binding IsChecked}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </Grid>
+            <Grid Grid.Row="5" VerticalAlignment="Center" Background="#44444444" Height="110">
                 <TextBlock Text="Settings" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,5"/>
                 <TextBlock x:Name="Scale" Text="Scale: Chromatic" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,25"/>
                 <CheckBox x:Name="EnableVibrato" Content="Enable vibrato" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,45,0,0" ClickMode="Press"/>
