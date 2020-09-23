@@ -2,6 +2,9 @@
 
 ShawzinBot is a program which converts a MIDI input or file to a series of key presses for the Shawzin. Any MIDI input works with this script (a MIDI keyboard, a virtual MIDI channel, etc), as well as [Standard MIDI Files (SMF)](https://www.midi.org/specifications/category/smf-specifications).
 
+# Virus Scan
+You can check the virus scan for the precompiled version [here](https://www.virustotal.com/gui/file/3cb941d7918c21f79d749aba8434b8ef55a8eadc024277c94502e3f89f4e40df/detection).
+
 # Download
 You can always get the latest version of ShawzinBot [here](https://github.com/ianespana/ShawzinBot/releases/latest).
 
