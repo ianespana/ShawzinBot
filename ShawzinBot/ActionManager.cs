@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Shapes;
 using Melanchall.DryWetMidi.Smf;
-//using Dapplo.Windows.Input;
 using Keyboard = InputManager.Keyboard;
 using Timer = System.Threading.Timer;
 
@@ -15,9 +14,9 @@ namespace ShawzinBot
 {
     public class ActionManager
     {
-        public const UInt32 WM_KEYDOWN = 0x0100;
-        public const UInt32 WM_KEYUP = 0x0101;
-        public const UInt32 WM_SETTEXT = 0x000C;
+        public const uint WM_KEYDOWN = 0x0100;
+        public const uint WM_KEYUP = 0x0101;
+        public const uint WM_SETTEXT = 0x000C;
 
         private static IntPtr warframeWindow = IntPtr.Zero;
 
@@ -105,8 +104,6 @@ namespace ShawzinBot
             public Rectangle rcDevice;
         }
 
-
-
         [DllImport("user32.dll")]
         public static extern IntPtr FindWindow(string className, string windowTitle);
 
@@ -173,7 +170,6 @@ namespace ShawzinBot
                 }
             }
 
-            var shawzinNote = shawzinNotes[noteId];
             PlayNote(noteId, enableVibrato, transposeNotes);
             return true;
         }
@@ -190,6 +186,7 @@ namespace ShawzinBot
             SetScale(shawzinNote[0]);
             var stringKey = shawzinStrings[shawzinNote[2]];
 
+            
             Keyboard.KeyUp(fretKey);
             fretKey = shawzinFrets[shawzinNote[1]];
 
