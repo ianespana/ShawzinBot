@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Timers;
 using Caliburn.Micro;
 using Melanchall.DryWetMidi.Devices;
 using Melanchall.DryWetMidi.Smf;
@@ -46,6 +47,8 @@ namespace ShawzinBot.ViewModels
 
         private TrackChunk metaTrack;
         private TrackChunk firstTrack;
+
+        private Timer playTimer;
 
         #endregion
 
@@ -229,6 +232,23 @@ namespace ShawzinBot.ViewModels
                 Properties.Settings.Default.PlayThroughSpeakers = value;
                 Properties.Settings.Default.Save();
                 NotifyOfPropertyChange(() => PlayThroughSpeakers);
+
+                if (playback != null)
+                {
+                    if (!_playThroughSpeakers && playback.OutputDevice != null)
+                    {
+                        playback.OutputDevice.Dispose();
+                        playback.OutputDevice = null;
+                    }
+                    else if (_playThroughSpeakers && (playback.OutputDevice == null))
+                    {
+                        var list = OutputDevice.GetAll();
+                        if (list.Count() >= 1)
+                        {
+                            playback.OutputDevice = list.FirstOrDefault();
+                        }
+                    }
+                }
             }
         }
 
@@ -347,27 +367,30 @@ namespace ShawzinBot.ViewModels
             }
             else
             {
-                PlayPauseIcon = "Pause";
-
-                if (!PlayThroughSpeakers && playback.OutputDevice != null)
-                {
-                    playback.OutputDevice.Dispose();
-                    playback.OutputDevice = null;
-                }
-                else if (PlayThroughSpeakers && (playback.OutputDevice == null))
-                {
-                    var list = OutputDevice.GetAll();
-                    if (list.Count() >= 1)
-                    {
-                        playback.OutputDevice = list.FirstOrDefault();
-                    }
-                }
+                PlayPauseIcon = "Pause";                
 
                 ActionManager.OnSongPlay();
-                while (!ActionManager.IsWindowFocused("Warframe")) { }
-                playback.Start();
+                playTimer = new Timer();
+                playTimer.Interval = 100;
+                playTimer.Elapsed += new ElapsedEventHandler(PlayTimerElapsed);
+                playTimer.AutoReset = false;
+                playTimer.Start();
             }
             UpdateScale(ActionManager.activeScale);
+        }
+
+        private void PlayTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            if (ActionManager.IsWindowFocused("Warframe") || PlayThroughSpeakers)
+            {
+                playback.Start();
+                playTimer.Stop();
+            }
+            else
+            {
+                playTimer.Stop();
+                playTimer.Start();
+            }
         }
 
         public void Previous()
@@ -431,7 +454,7 @@ namespace ShawzinBot.ViewModels
                     if (note != null && note.Velocity <= 0) return;
 
                     //Check if the user has tabbed out of warframe, and stop playback to avoid Scale issues
-                    if (!ActionManager.PlayNote(note, EnableVibrato, TransposeNotes)) PlayPause();
+                    if (!(ActionManager.PlayNote(note, EnableVibrato, TransposeNotes) || PlayThroughSpeakers)) PlayPause();
                     return;
                 default:
                     return;

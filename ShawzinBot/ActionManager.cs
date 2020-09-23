@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Shapes;
 using Melanchall.DryWetMidi.Smf;
+//using Dapplo.Windows.Input;
 using Keyboard = InputManager.Keyboard;
 using Timer = System.Threading.Timer;
 
