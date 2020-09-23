@@ -349,16 +349,18 @@ namespace ShawzinBot.ViewModels
             {
                 PlayPauseIcon = "Pause";
 
-                var device = OutputDevice.GetById(0);
-
                 if (!PlayThroughSpeakers && playback.OutputDevice != null)
                 {
                     playback.OutputDevice.Dispose();
                     playback.OutputDevice = null;
                 }
-                else if (PlayThroughSpeakers && (playback.OutputDevice == null || playback.OutputDevice.ProductIdentifier != device.ProductIdentifier))
+                else if (PlayThroughSpeakers && (playback.OutputDevice == null))
                 {
-                    playback.OutputDevice = device;
+                    var list = OutputDevice.GetAll();
+                    if (list.Count() >= 1)
+                    {
+                        playback.OutputDevice = list.FirstOrDefault();
+                    }
                 }
 
                 ActionManager.OnSongPlay();
