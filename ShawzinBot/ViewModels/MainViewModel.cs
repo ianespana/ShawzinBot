@@ -90,7 +90,7 @@ namespace ShawzinBot.ViewModels
                 GitVersion p = serializer.Deserialize<GitVersion>(reader);
                 if (!(p.draft || p.prerelease) && p.tag_name != _programVersion.ToString())
                 {
-                    VersionString = VersionString + " - Update available!";
+                    VersionString = _programVersion.ToString() + " - Update available!";
                 }
             }
 
