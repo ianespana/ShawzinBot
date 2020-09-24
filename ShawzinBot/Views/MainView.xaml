@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:ShawzinBot.Views"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:cal="http://www.caliburnproject.org"
@@ -15,7 +16,7 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
-        Title="MainView" Height="500" Width="300">
+        Title="MainView" Height="510" Width="300">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>
@@ -78,7 +79,7 @@
                 <RowDefinition Height="40"/>
                 <RowDefinition Height="70"/>
                 <RowDefinition Height="120"/>
-                <RowDefinition Height="120"/>
+                <RowDefinition Height="130"/>
             </Grid.RowDefinitions>
 
             <Ellipse Grid.Row="0" Width="150" Height="150" HorizontalAlignment="Center" VerticalAlignment="Center" StrokeThickness="1">
@@ -191,12 +192,16 @@
                     </ItemsControl>
                 </ScrollViewer>
             </Grid>
-            <Grid Grid.Row="5" VerticalAlignment="Center" Background="#44444444" Height="110">
+            <Grid Grid.Row="5" VerticalAlignment="Center" Background="#44444444" Height="120">
                 <TextBlock Text="Settings" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,5"/>
                 <TextBlock x:Name="Scale" Text="Scale: Chromatic" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,25"/>
                 <CheckBox x:Name="EnableVibrato" Content="Enable vibrato" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,45,0,0" ClickMode="Press"/>
                 <CheckBox x:Name="TransposeNotes" Content="Transpose notes" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,65,0,0" ClickMode="Press"/>
-                <CheckBox x:Name="PlayThroughSpeakers" Content="Play MIDI through speakers" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,85,0,0" ClickMode="Press"/>
+                <TextBlock Text="Playback speed:" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,91,0,0"/>
+                <ComboBox x:Name="MidiSpeeds" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="115,85,0,0" Width="65" Height="30" Background="#FF444444"
+                          SelectedItem="{Binding Path=SelectedMidiSpeed, Mode=TwoWay}"
+                          DisplayMemberPath="SpeedName"/>
+                <CheckBox x:Name="PlayThroughSpeakers" Content="Play MIDI through speakers" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,85,0,0" ClickMode="Press" Visibility="Hidden"/>
             </Grid>
         </Grid>
     </Grid>

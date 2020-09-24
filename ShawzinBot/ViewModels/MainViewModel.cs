@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Timers;
 using Caliburn.Micro;
+using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Devices;
-using Melanchall.DryWetMidi.Smf;
-using Melanchall.DryWetMidi.Smf.Interaction;
+using Melanchall.DryWetMidi.Interaction;
 using Microsoft.Win32;
 using ShawzinBot.Models;
 using InputDevice = Melanchall.DryWetMidi.Devices.InputDevice;
@@ -26,7 +26,9 @@ namespace ShawzinBot.ViewModels
         
         private BindableCollection<MidiInputModel> _midiInputs = new BindableCollection<MidiInputModel>();
         private BindableCollection<MidiTrackModel> _midiTracks = new BindableCollection<MidiTrackModel>();
+        private BindableCollection<MidiSpeedModel> _midiSpeeds = new BindableCollection<MidiSpeedModel>();
         private MidiInputModel _selectedMidiInput;
+        private MidiSpeedModel _selectedMidiSpeed;
 
         private bool _enableVibrato = true;
         private bool _transposeNotes = true;
@@ -49,6 +51,8 @@ namespace ShawzinBot.ViewModels
         private TrackChunk firstTrack;
 
         private Timer playTimer;
+        private OutputDevice device;
+        private ITimeSpan playTime = new MidiTimeSpan();
 
         #endregion
 
@@ -75,6 +79,17 @@ namespace ShawzinBot.ViewModels
             }
 
             SelectedMidiInput = MidiInputs[0];
+
+            MidiSpeeds.Add(new MidiSpeedModel("0.25", 0.25));
+            MidiSpeeds.Add(new MidiSpeedModel("0.5", 0.5));
+            MidiSpeeds.Add(new MidiSpeedModel("0.75", 0.75));
+            MidiSpeeds.Add(new MidiSpeedModel("Normal", 1));
+            MidiSpeeds.Add(new MidiSpeedModel("1.25", 1.25));
+            MidiSpeeds.Add(new MidiSpeedModel("1.5", 1.5));
+            MidiSpeeds.Add(new MidiSpeedModel("1.75", 1.75));
+            MidiSpeeds.Add(new MidiSpeedModel("2", 2));
+
+            SelectedMidiSpeed = MidiSpeeds[3];
 
             EnableVibrato = Properties.Settings.Default.EnableVibrato;
             TransposeNotes = Properties.Settings.Default.TransposeNotes;
@@ -169,16 +184,6 @@ namespace ShawzinBot.ViewModels
             }
         }
 
-        public BindableCollection<MidiTrackModel> MidiTracks
-        {
-            get => _midiTracks;
-            set
-            {
-                _midiTracks = value;
-                NotifyOfPropertyChange(() => MidiTracks);
-            }
-        }
-
         public MidiInputModel SelectedMidiInput
         {
             get => _selectedMidiInput;
@@ -196,6 +201,41 @@ namespace ShawzinBot.ViewModels
                 }
 
                 NotifyOfPropertyChange(() => SelectedMidiInput);
+            }
+        }
+
+        public BindableCollection<MidiSpeedModel> MidiSpeeds
+        {
+            get => _midiSpeeds;
+            set
+            {
+                _midiSpeeds = value;
+                NotifyOfPropertyChange(() => MidiSpeeds);
+            }
+        }
+
+        public MidiSpeedModel SelectedMidiSpeed
+        {
+            get => _selectedMidiSpeed;
+            set
+            {
+                _selectedMidiSpeed = value;
+                NotifyOfPropertyChange(() => SelectedMidiSpeed);
+
+                if (value?.Speed != null && playback != null)
+                {
+                    playback.Speed = value.Speed;
+                }
+            }
+        }
+
+        public BindableCollection<MidiTrackModel> MidiTracks
+        {
+            get => _midiTracks;
+            set
+            {
+                _midiTracks = value;
+                NotifyOfPropertyChange(() => MidiTracks);
             }
         }
 
@@ -228,27 +268,24 @@ namespace ShawzinBot.ViewModels
             get => _playThroughSpeakers;
             set
             {
-                _playThroughSpeakers = value;
+                //_playThroughSpeakers = value;
+                _playThroughSpeakers = false;
                 Properties.Settings.Default.PlayThroughSpeakers = value;
                 Properties.Settings.Default.Save();
                 NotifyOfPropertyChange(() => PlayThroughSpeakers);
 
-                if (playback != null)
+                /*if (playback != null)
                 {
-                    if (!_playThroughSpeakers && playback.OutputDevice != null)
+                    if (!_playThroughSpeakers && device != null)
                     {
-                        playback.OutputDevice.Dispose();
-                        playback.OutputDevice = null;
+                        device.Dispose();
                     }
-                    else if (_playThroughSpeakers && (playback.OutputDevice == null))
+                    else if (_playThroughSpeakers && (device == null))
                     {
-                        var list = OutputDevice.GetAll();
-                        if (list.Count() >= 1)
-                        {
-                            playback.OutputDevice = list.FirstOrDefault();
-                        }
+                        device = OutputDevice.GetByName("Microsoft GS Wavetable Synth");
+                        playback.OutputDevice = device;
                     }
-                }
+                }*/
             }
         }
 
@@ -302,15 +339,13 @@ namespace ShawzinBot.ViewModels
             if (playback != null)
             {
                 playback.Stop();
-                playback.OutputDevice?.Dispose();
-
                 PlaybackCurrentTimeWatcher.Instance.RemovePlayback(playback);
-
-                playback?.Dispose();
+                playback.Dispose();
+                playback = null;
             }
 
-            playback = null;
             midiFile = null;
+            MidiTracks.Clear();
 
             PlayPauseIcon = "Play";
             SongName = "";
@@ -323,13 +358,12 @@ namespace ShawzinBot.ViewModels
         {
             if (midiFile == null || MaximumTime == 0d) return;
             if (playback == null || reloadPlayback)
-            {
-                ITimeSpan playTime = new MidiTimeSpan();
+            {                
                 if (playback != null)
                 {
                     playback.Stop();
                     playTime = playback.GetCurrentTime(TimeSpanType.Midi);
-                    playback.OutputDevice?.Dispose();
+                    playback.Dispose();
                     playback = null;
                     PlayPauseIcon = "Play";
                 }
@@ -346,6 +380,12 @@ namespace ShawzinBot.ViewModels
                 }
 
                 playback = midiFile.GetPlayback();
+                playback.Speed = SelectedMidiSpeed.Speed;
+                if (PlayThroughSpeakers)
+                {
+                    device = OutputDevice.GetByName("Microsoft GS Wavetable Synth");
+                    playback.OutputDevice = device;
+                }
                 playback.MoveToTime(playTime);
                 playback.Finished += (s, e) =>
                 {
@@ -365,6 +405,10 @@ namespace ShawzinBot.ViewModels
                 PlayPauseIcon = "Play";
                 playback.Stop();
             }
+            else if (PlayPauseIcon == "Pause") {
+                PlayPauseIcon = "Play";
+                playTimer.Dispose();
+            }
             else
             {
                 PlayPauseIcon = "Pause";                
@@ -373,10 +417,8 @@ namespace ShawzinBot.ViewModels
                 playTimer = new Timer();
                 playTimer.Interval = 100;
                 playTimer.Elapsed += new ElapsedEventHandler(PlayTimerElapsed);
-                playTimer.AutoReset = false;
                 playTimer.Start();
             }
-            UpdateScale(ActionManager.activeScale);
         }
 
         private void PlayTimerElapsed(object sender, ElapsedEventArgs e)
@@ -384,12 +426,7 @@ namespace ShawzinBot.ViewModels
             if (ActionManager.IsWindowFocused("Warframe") || PlayThroughSpeakers)
             {
                 playback.Start();
-                playTimer.Stop();
-            }
-            else
-            {
-                playTimer.Stop();
-                playTimer.Start();
+                playTimer.Dispose();
             }
         }
 
@@ -447,7 +484,7 @@ namespace ShawzinBot.ViewModels
             {
                 case MidiEventType.SetTempo:
                     var tempo = e.Event as SetTempoEvent;
-                    playback.Speed = tempo.MicrosecondsPerQuarterNote;
+                    //playback.Speed = tempo.MicrosecondsPerQuarterNote;
                     return;
                 case MidiEventType.NoteOn:
                     var note = e.Event as NoteOnEvent;
@@ -455,6 +492,7 @@ namespace ShawzinBot.ViewModels
 
                     //Check if the user has tabbed out of warframe, and stop playback to avoid Scale issues
                     if (!(ActionManager.PlayNote(note, EnableVibrato, TransposeNotes) || PlayThroughSpeakers)) PlayPause();
+                    UpdateScale(ActionManager.activeScale);
                     return;
                 default:
                     return;

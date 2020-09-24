@@ -6,7 +6,9 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Shapes;
-using Melanchall.DryWetMidi.Smf;
+using Melanchall.DryWetMidi;
+using Melanchall.DryWetMidi.Core;
+using ShawzinBot.ViewModels;
 using Keyboard = InputManager.Keyboard;
 using Timer = System.Threading.Timer;
 
