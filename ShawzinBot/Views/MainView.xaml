@@ -204,5 +204,6 @@
                 <CheckBox x:Name="PlayThroughSpeakers" Content="Play MIDI through speakers" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,85,0,0" ClickMode="Press" Visibility="Hidden"/>
             </Grid>
         </Grid>
+        <TextBlock Text="{Binding Path=VersionString}" Grid.Column="1" Grid.Row="3"/>
     </Grid>
 </Window>

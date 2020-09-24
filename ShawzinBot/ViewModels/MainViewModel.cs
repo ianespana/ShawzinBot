@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Timers;
+using System.Net;
 using Caliburn.Micro;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Devices;
@@ -9,6 +11,8 @@ using Melanchall.DryWetMidi.Interaction;
 using Microsoft.Win32;
 using ShawzinBot.Models;
 using InputDevice = Melanchall.DryWetMidi.Devices.InputDevice;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace ShawzinBot.ViewModels
 {
@@ -54,6 +58,9 @@ namespace ShawzinBot.ViewModels
         private OutputDevice device;
         private ITimeSpan playTime = new MidiTimeSpan();
 
+        private Version _programVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        private string _versionString = "";
+
         #endregion
 
         #region Public Variables
@@ -71,6 +78,22 @@ namespace ShawzinBot.ViewModels
 
         public MainViewModel()
         {
+            VersionString = _programVersion.ToString();
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://api.github.com/repos/ianespana/ShawzinBot/releases/latest");
+            request.UserAgent = "request";
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+            using (JsonReader reader = new JsonTextReader(sr))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                GitVersion p = serializer.Deserialize<GitVersion>(reader);
+                if ((p.draft || p.prerelease) && p.tag_name != VersionString)
+                {
+                    VersionString = VersionString + " - Update available!";
+                }
+            }
+
             MidiInputs.Add(new MidiInputModel("None"));
 
             foreach (var device in InputDevice.GetAll())
@@ -100,6 +123,16 @@ namespace ShawzinBot.ViewModels
         #endregion
 
         #region Properties
+
+        public string VersionString
+        {
+            get => _versionString;
+            set
+            {
+                _versionString = "v" + value;
+                NotifyOfPropertyChange(() => VersionString);
+            }
+        }
 
         public string SongName
         {
