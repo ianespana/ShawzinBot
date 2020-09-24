@@ -88,7 +88,7 @@ namespace ShawzinBot.ViewModels
             {
                 JsonSerializer serializer = new JsonSerializer();
                 GitVersion p = serializer.Deserialize<GitVersion>(reader);
-                if (!(p.draft || p.prerelease) && p.tag_name != VersionString)
+                if (!(p.draft || p.prerelease) && p.tag_name != _programVersion.ToString())
                 {
                     VersionString = VersionString + " - Update available!";
                 }
