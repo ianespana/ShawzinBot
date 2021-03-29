@@ -50,6 +50,6 @@ using System.Windows;
 // Puede especificar todos los valores o usar los valores predeterminados de número de compilación y de revisión
 // utilizando el carácter "*", como se muestra a continuación:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.2.2.3")]
-[assembly: AssemblyFileVersion("2.2.2.3")]
+[assembly: AssemblyVersion("2.2.2.4")]
+[assembly: AssemblyFileVersion("2.2.2.4")]
 [assembly: NeutralResourcesLanguage("en")]
