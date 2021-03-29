@@ -52,7 +52,6 @@ namespace ShawzinBot.ViewModels
         };
 
         private System.Collections.Generic.IEnumerable<TrackChunk> midiTrackChunks;
-        private TrackChunk metaTrack;
         private TrackChunk firstTrack;
 
         private Timer playTimer;
@@ -419,7 +418,7 @@ namespace ShawzinBot.ViewModels
                 }
 
                 midiFile.Chunks.Clear();
-                midiFile.Chunks.Add(metaTrack);
+                midiFile.Chunks.Add(firstTrack);
 
                 foreach (MidiTrackModel trackModel in MidiTracks)
                 {
