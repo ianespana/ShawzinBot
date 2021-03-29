@@ -82,16 +82,23 @@ namespace ShawzinBot.ViewModels
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://api.github.com/repos/ianespana/ShawzinBot/releases/latest");
             request.UserAgent = "request";
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-            using (JsonReader reader = new JsonTextReader(sr))
+            try
             {
-                JsonSerializer serializer = new JsonSerializer();
-                GitVersion p = serializer.Deserialize<GitVersion>(reader);
-                if (!(p.draft || p.prerelease) && p.tag_name != _programVersion.ToString())
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                using (JsonReader reader = new JsonTextReader(sr))
                 {
-                    VersionString = _programVersion.ToString() + " - Update available!";
+                    JsonSerializer serializer = new JsonSerializer();
+                    GitVersion p = serializer.Deserialize<GitVersion>(reader);
+                    if (!(p.draft || p.prerelease) && p.tag_name != _programVersion.ToString())
+                    {
+                        VersionString = _programVersion.ToString() + " - Update available!";
+                    }
                 }
+            }
+            catch (WebException ex)
+            {
+                Console.WriteLine(ex);
             }
 
             MidiInputs.Add(new MidiInputModel("None"));
